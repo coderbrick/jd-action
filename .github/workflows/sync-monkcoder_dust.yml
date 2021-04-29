@@ -1,0 +1,43 @@
+name: sync-monkcoder_dust
+
+on:
+  workflow_dispatch:
+  push:
+    branches: 
+      - master
+  schedule:
+   - cron: '0 0-12/1 * * *'
+jobs:
+  jdbot_pull:
+    runs-on: ubuntu-latest
+    steps:
+      - name: set_time
+        run: |
+          cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+          date
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: 'clone dust'
+        run: |
+          bash ./download.sh
+          echo "=================="
+          echo "# 更新时间⌚️ 
+          > $(date +%Y%m%d%H%M%S)" > README.md
+      - name: Commit files
+        run: |
+          pwd
+          ls
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git commit -m "$(date +%Y%m%d%H%M%S)" -a
+      - name: 'Push changes'
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.PAT }}
+      #- name: 'Create a Release'
+      # uses: elgohr/Github-Release-Action@master
+      # env:
+      #   GITHUB_TOKEN: ${{ secrets.PAT }}
+      # with:
+      #   args: scripts
